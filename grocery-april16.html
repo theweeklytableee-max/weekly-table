@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Weekly Table — Grocery List · April 6</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    @font-face {
+      font-family: 'Chantal';
+      src: url('Chantal_W00_Bold.ttf') format('truetype');
+      font-weight: bold;
+      font-style: normal;
+    }
+  </style>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --yellow: #ffeda8;
+      --red: #70060b;
+      --brown: #372819;
+      --blue: #d2e9ff;
+
+      --cream: #d2e9ff;
+      --warm-white: #e8f3ff;
+      --accent: #70060b;
+      --accent-light: #ffeda8;
+      --green: #70060b;
+      --text: #372819;
+      --text-muted: #70060b;
+      --border: rgba(55, 40, 25, 0.2);
+      --shadow: rgba(55, 40, 25, 0.12);
+      --tag-mon: #ffeda8; --tag-mon-text: #70060b;
+      --tag-tue: #ffeda8; --tag-tue-text: #70060b;
+      --tag-wed: #ffeda8; --tag-wed-text: #70060b;
+      --tag-all: #d2e9ff; --tag-all-text: #372819;
+      --tag-opt: #d2e9ff; --tag-opt-text: #372819;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--cream);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    header {
+      color: #ffeda8;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      background: #70060b;
+    }
+    /* Top & bottom stripe bands */
+    header::before, header::after {
+      content: '';
+      position: absolute; left: 0; right: 0;
+      height: 50px;
+      background: repeating-linear-gradient(
+        90deg,
+        #d2e9ff 0px,
+        #d2e9ff 22px,
+        #ffffff 22px,
+        #ffffff 24px,
+        #70060b 24px,
+        #70060b 54px,
+        #ffffff 54px,
+        #ffffff 56px,
+        #d2e9ff 56px,
+        #d2e9ff 60px,
+        #ffffff 60px,
+        #ffffff 62px,
+        #70060b 62px,
+        #70060b 76px,
+        #ffffff 76px,
+        #ffffff 78px
+      );
+    }
+    header::before { top: 0; }
+    header::after  { bottom: 0; }
+    .header-inner {
+      position: relative;
+      z-index: 1;
+      padding: 4rem 1rem 3.5rem;
+    }
+    .header-text-box {
+      display: inline-block;
+    }
+    .header-logo {
+      font-family: 'Chantal', cursive;
+      font-size: clamp(3rem, 9vw, 5.5rem);
+      letter-spacing: 0.08em;
+      line-height: 1.1;
+      color: #ffeda8;
+      text-shadow: 2px 3px 0px rgba(0,0,0,0.25);
+    }
+    .header-logo span { display: block; }
+    .header-sub {
+      margin-top: 0.6rem;
+      font-size: 1rem;
+      color: #ffeda8;
+      letter-spacing: 0.04em;
+      font-weight: 500;
+    }
+    .header-date {
+      display: inline-block;
+      margin-top: 1rem;
+      background: #ffeda8;
+      color: #70060b;
+      border-radius: 99px;
+      padding: 0.4rem 1.4rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-family: 'Chantal', cursive;
+    }
+
+    /* PROGRESS */
+    .progress-wrapper {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px var(--shadow);
+    }
+    .progress-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+    .progress-label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+    .progress-count { font-size: 0.85rem; font-weight: 700; color: var(--brown); }
+    .progress-bar-bg { height: 8px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #70060b, #372819); border-radius: 99px; transition: width 0.4s ease; width: 0%; }
+    .reset-btn {
+      display: block; margin: 0.6rem auto 0;
+      background: none; border: 1px solid var(--border); border-radius: 99px;
+      color: var(--text-muted); font-family: 'DM Sans', sans-serif; font-size: 0.78rem;
+      padding: 0.25rem 0.9rem; cursor: pointer; transition: all 0.2s;
+    }
+    .reset-btn:hover { background: var(--cream); color: var(--brown); }
+
+    /* DONE BANNER */
+    .done-banner { display: none; background: #70060b; color: #ffeda8; text-align: center; padding: 1.2rem; font-size: 1rem; font-weight: 600; }
+    .done-banner.show { display: block; animation: slideIn 0.4s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* HINT */
+    .hint { text-align: center; padding: 0.9rem 1.2rem; font-size: 0.88rem; color: var(--text-muted); background: var(--warm-white); border-bottom: 1px solid var(--border); }
+
+    /* MAIN */
+    main { max-width: 680px; margin: 0 auto; padding: 1.2rem 1rem 3rem; }
+
+    /* CATEGORY */
+    .category { background: white; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 1rem; overflow: hidden; box-shadow: 0 2px 8px var(--shadow); }
+    .category-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.2rem; cursor: pointer; user-select: none; background: var(--warm-white); border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    .category-header:hover { background: #c2daf0; }
+    .category-title { font-family: 'Chantal', cursive; font-size: 1.1rem; color: var(--brown); display: flex; align-items: center; gap: 0.5rem; letter-spacing: 0.06em; }
+    .category-meta { display: flex; align-items: center; gap: 0.7rem; }
+    .cat-count { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+    .cat-arrow { font-size: 0.8rem; color: var(--text-muted); transition: transform 0.25s; }
+    .category.open .cat-arrow { transform: rotate(180deg); }
+    .category-body { display: none; }
+    .category.open .category-body { display: block; }
+
+    /* GROCERY ITEM */
+    .grocery-item { display: flex; align-items: center; gap: 0.9rem; padding: 0.75rem 1.2rem; border-bottom: 1px solid #d2e9ff; cursor: pointer; transition: background 0.15s; }
+    .grocery-item:last-child { border-bottom: none; }
+    .grocery-item:hover { background: #e8f3ff; }
+    .grocery-item.checked { opacity: 0.55; }
+    .grocery-item.checked .item-name { text-decoration: line-through; color: var(--text-muted); }
+    .item-checkbox { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; background: white; font-size: 0.75rem; }
+    .grocery-item.checked .item-checkbox { background: #70060b; border-color: #70060b; color: #ffeda8; }
+    .item-name { font-size: 0.92rem; font-weight: 500; flex: 1; line-height: 1.4; }
+    .day-tag { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; padding: 0.15rem 0.55rem; border-radius: 99px; flex-shrink: 0; text-transform: uppercase; }
+    .tag-MON { background: var(--tag-mon); color: var(--tag-mon-text); }
+    .tag-TUE { background: var(--tag-tue); color: var(--tag-tue-text); }
+    .tag-WED { background: var(--tag-wed); color: var(--tag-wed-text); }
+    .tag-ALL { background: var(--tag-all); color: var(--tag-all-text); }
+    .tag-MONWED { background: #ffeda8; color: #70060b; }
+    .tag-TUEWED { background: #ffeda8; color: #70060b; }
+    .tag-OPTIONAL { background: var(--tag-opt); color: var(--tag-opt-text); }
+
+    /* RECIPES */
+    .recipes-section { margin-top: 2rem; }
+    .recipes-title { font-family: 'Chantal', cursive; font-size: 1.6rem; color: var(--brown); margin-bottom: 1rem; text-align: center; letter-spacing: 0.06em; }
+    .recipes-sub { text-align: center; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.2rem; }
+
+    .recipe-card { background: white; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 1rem; overflow: hidden; box-shadow: 0 2px 8px var(--shadow); }
+    .recipe-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.2rem; cursor: pointer; background: var(--warm-white); border-bottom: 1px solid var(--border); user-select: none; transition: background 0.15s; }
+    .recipe-header:hover { background: #c2daf0; }
+    .recipe-title-wrap { display: flex; align-items: center; gap: 0.6rem; }
+    .recipe-emoji { font-size: 1.4rem; }
+    .recipe-day { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+    .recipe-name { font-family: 'Chantal', cursive; font-size: 1.1rem; color: var(--brown); letter-spacing: 0.05em; }
+    .recipe-arrow { font-size: 0.8rem; color: var(--text-muted); transition: transform 0.25s; }
+    .recipe-card.open .recipe-arrow { transform: rotate(180deg); }
+    .recipe-body { display: none; padding: 1.2rem; }
+    .recipe-card.open .recipe-body { display: block; }
+
+    .recipe-sub-title { font-family: 'Chantal', cursive; font-size: 1rem; color: var(--brown); margin: 1.2rem 0 0.5rem; padding-bottom: 0.3rem; border-bottom: 1px solid var(--border); letter-spacing: 0.05em; }
+    .recipe-sub-title:first-child { margin-top: 0; }
+
+    .ingredient-list { list-style: none; margin-bottom: 0.8rem; }
+    .ingredient-list li { font-size: 0.88rem; color: var(--text); padding: 0.25rem 0 0.25rem 1rem; position: relative; line-height: 1.5; }
+    .ingredient-list li::before { content: '·'; position: absolute; left: 0; color: #70060b; font-weight: bold; }
+
+    .instruction-list { list-style: none; counter-reset: step; }
+    .instruction-list li { font-size: 0.88rem; color: var(--text); padding: 0.4rem 0 0.4rem 2rem; position: relative; line-height: 1.6; border-bottom: 1px dotted var(--border); counter-increment: step; }
+    .instruction-list li:last-child { border-bottom: none; }
+    .instruction-list li::before { content: counter(step); position: absolute; left: 0; width: 1.5rem; height: 1.5rem; background: #ffeda8; color: #70060b; border-radius: 50%; font-size: 0.72rem; font-weight: 700; display: flex; align-items: center; justify-content: center; top: 0.38rem; }
+
+    .recipe-divider { border: none; border-top: 2px dashed var(--border); margin: 1.2rem 0; }
+
+    /* FOOTER */
+    footer { text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: 0.85rem; border-top: 1px solid var(--border); background: var(--warm-white); }
+    footer strong { color: var(--brown); }
+    footer p { margin-top: 0.3rem; }
+  </style>
+</head>
+<body>
+
+<header>
+<div class="header-inner">
+<div class="header-text-box">
+  <div class="header-logo">
+    <span>THE</span>
+    <span>WEEKLY</span>
+    <span>TABLE</span>
+  </div>
+  <div class="header-sub">Your weekly grocery list 🛒</div>
+  <div class="header-date">📅 Week of April 6, 2026</div>
+</div>
+</div>
+</header>
+
+<div class="done-banner" id="doneBanner">
+  🎉 You're all set! Happy cooking this week — see you at the table!
+</div>
+
+<div class="progress-wrapper">
+  <div class="progress-top">
+    <span class="progress-label">💌 Tap items to check them off as you shop!</span>
+    <span class="progress-count" id="progressCount">0 of 47</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progressBar"></div>
+  </div>
+  <button class="reset-btn" onclick="resetAll()">Reset</button>
+</div>
+
+<div class="hint">🍽️ Progress saves automatically. Recipes are at the bottom.</div>
+
+<main>
+
+  <!-- PROTEIN -->
+  <div class="category open" id="cat-protein">
+    <div class="category-header" onclick="toggleCategory('cat-protein')">
+      <div class="category-title">🥩 Protein</div>
+      <div class="category-meta">
+        <span class="cat-count" id="cnt-protein">0/4</span>
+        <span class="cat-arrow">▾</span>
+      </div>
+    </div>
+    <div class="category-body">
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">10–12 boneless chicken thighs</div><span class="day-tag tag-MON">MON</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">1 lb ground beef</div><span class="day-tag tag-TUE">TUE</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">1 lb 93% lean ground turkey</div><span class="day-tag tag-WED">WED</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Cheddar cheese slices (optional, for turkey burgers)</div><span class="day-tag tag-OPTIONAL">OPTIONAL</span></div>
+    </div>
+  </div>
+
+  <!-- PRODUCE -->
+  <div class="category open" id="cat-produce">
+    <div class="category-header" onclick="toggleCategory('cat-produce')">
+      <div class="category-title">🥦 Produce</div>
+      <div class="category-meta">
+        <span class="cat-count" id="cnt-produce">0/17</span>
+        <span class="cat-arrow">▾</span>
+      </div>
+    </div>
+    <div class="category-body">
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">3 limes (2 for marinade, 1 for dressing)</div><span class="day-tag tag-MON">MON</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Garlic (~1 bulb — used all week)</div><span class="day-tag tag-ALL">ALL</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">4 mini cucumbers, sliced</div><span class="day-tag tag-MON">MON</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">2 ripe avocados</div><span class="day-tag tag-MON">MON</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Fresh cilantro (2 tbsp for bowls + 2 tbsp for dressing)</div><span class="day-tag tag-MON">MON</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">½ cup pickled onions</div><span class="day-tag tag-MON">MON</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">2 medium onions (for meatballs)</div><span class="day-tag tag-TUE">TUE</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">1 cup fresh herbs — parsley, mint, coriander</div><span class="day-tag tag-TUE">TUE</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">6 medium potatoes, cut into wedges</div><span class="day-tag tag-TUE">TUE</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">1 cucumber (for tzatziki)</div><span class="day-tag tag-TUE">TUE</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Fresh dill or mint (⅓ cup, for tzatziki)</div><span class="day-tag tag-TUE">TUE</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">1 lemon (for tzatziki + salad)</div><span class="day-tag tag-TUE">TUE</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">2 cups crisp lettuce leaves</div><span class="day-tag tag-TUE">TUE</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">2 medium tomatoes, chopped</div><span class="day-tag tag-TUE">TUE</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">2 cucumbers, chopped (for salad)</div><span class="day-tag tag-TUE">TUE</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">½ red onion, chopped</div><span class="day-tag tag-TUE">TUE</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Lettuce, tomato, onion (for turkey burgers)</div><span class="day-tag tag-WED">WED</span></div>
+    </div>
+  </div>
+
+  <!-- DAIRY -->
+  <div class="category open" id="cat-dairy">
+    <div class="category-header" onclick="toggleCategory('cat-dairy')">
+      <div class="category-title">🧀 Dairy &amp; Refrigerated</div>
+      <div class="category-meta">
+        <span class="cat-count" id="cnt-dairy">0/2</span>
+        <span class="cat-arrow">▾</span>
+      </div>
+    </div>
+    <div class="category-body">
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">1 cup thick Greek yogurt (for tzatziki)</div><span class="day-tag tag-TUE">TUE</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">1 tbsp mayonnaise (for turkey burgers)</div><span class="day-tag tag-WED">WED</span></div>
+    </div>
+  </div>
+
+  <!-- PANTRY -->
+  <div class="category open" id="cat-pantry">
+    <div class="category-header" onclick="toggleCategory('cat-pantry')">
+      <div class="category-title">🫙 Pantry / Sauces / Condiments</div>
+      <div class="category-meta">
+        <span class="cat-count" id="cnt-pantry">0/24</span>
+        <span class="cat-arrow">▾</span>
+      </div>
+    </div>
+    <div class="category-body">
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Olive oil (used all week)</div><span class="day-tag tag-ALL">ALL</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">2 cups white rice</div><span class="day-tag tag-MON">MON</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">1¾ cups chicken or veggie broth</div><span class="day-tag tag-MON">MON</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Paprika</div><span class="day-tag tag-TUEWED">MON/TUE</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Onion powder (1 tbsp)</div><span class="day-tag tag-MON">MON</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Garlic powder (1 tbsp)</div><span class="day-tag tag-MON">MON</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Cumin (1 tsp for chicken + ½ tsp for potatoes)</div><span class="day-tag tag-MONWED">MON/TUE</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Red chili flakes (used Mon + dressing)</div><span class="day-tag tag-MON">MON</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Honey (1 tbsp marinade + 1 tbsp dressing)</div><span class="day-tag tag-MON">MON</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Red wine vinegar (1 tbsp for dressing)</div><span class="day-tag tag-MON">MON</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Dijon mustard (1 tbsp dressing + 1 tbsp turkey burgers)</div><span class="day-tag tag-TUEWED">MON/WED</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Breadcrumbs (2 tbsp)</div><span class="day-tag tag-TUE">TUE</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Baking soda (1 tsp, for meatballs)</div><span class="day-tag tag-TUE">TUE</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Dried oregano (½ tsp for potatoes)</div><span class="day-tag tag-TUE">TUE</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">½ cup Kalamata olives, pitted and halved</div><span class="day-tag tag-TUE">TUE</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Worcestershire sauce (1 tsp)</div><span class="day-tag tag-WED">WED</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Salt</div><span class="day-tag tag-ALL">ALL</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Black pepper</div><span class="day-tag tag-ALL">ALL</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Pickles (for turkey burgers, optional)</div><span class="day-tag tag-OPTIONAL">OPTIONAL</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Ketchup + mustard (for turkey burgers, optional)</div><span class="day-tag tag-OPTIONAL">OPTIONAL</span></div>
+      <div class="grocery-item" onclick="toggleItem(this)"><div class="item-checkbox"></div><div class="item-name">Burger buns (optional)</div><span class="day-tag tag-OPTIONAL">OPTIONAL</span></div>
+    </div>
+  </div>
+
+  <!-- RECIPES -->
+  <div class="recipes-section">
+    <div class="recipes-title">This Week's Recipes</div>
+    <div class="recipes-sub">Tap each day to expand 👇</div>
+
+    <!-- MONDAY -->
+    <div class="recipe-card" id="rec-mon">
+      <div class="recipe-header" onclick="toggleRecipe('rec-mon')">
+        <div class="recipe-title-wrap">
+          <span class="recipe-emoji">🍋</span>
+          <div>
+            <div class="recipe-day">Monday · April 6</div>
+            <div class="recipe-name">Honey Lime Chicken Rice Bowls</div>
+          </div>
+        </div>
+        <span class="recipe-arrow">▾</span>
+      </div>
+      <div class="recipe-body">
+        <div class="recipe-sub-title">Chicken Marinade</div>
+        <ul class="ingredient-list">
+          <li>10–12 boneless chicken thighs</li>
+          <li>⅓ cup olive oil · 1 tbsp paprika · 1 tbsp salt · 1 tbsp onion powder · 1 tbsp garlic powder</li>
+          <li>1 tsp cumin · ½ tsp red chili flakes · 2 garlic cloves, grated</li>
+          <li>1 tbsp honey · freshly cracked black pepper · 2 limes, juiced &amp; zested</li>
+        </ul>
+        <div class="recipe-sub-title">Bowl Ingredients</div>
+        <ul class="ingredient-list">
+          <li>2 cups cooked white rice (cooked in broth for extra flavor)</li>
+          <li>½ cup pickled onions · 2 tbsp fresh cilantro, chopped</li>
+          <li>4 mini cucumbers, sliced · 2 ripe avocados, sliced</li>
+        </ul>
+        <div class="recipe-sub-title">Honey-Lime Dressing</div>
+        <ul class="ingredient-list">
+          <li>½ cup olive oil · 1 tbsp red wine vinegar · 1 tbsp Dijon mustard · 1 tbsp honey</li>
+          <li>1 tsp salt · ½ tsp red chili flakes · freshly cracked black pepper</li>
+          <li>1 garlic clove, grated · 1 lime, juiced &amp; zested · 2 tbsp cilantro, chopped</li>
+        </ul>
+        <div class="recipe-sub-title">Instructions</div>
+        <ol class="instruction-list">
+          <li>Whisk together all marinade ingredients. Add chicken and coat well. Marinate at least 30 minutes, up to 4 hours.</li>
+          <li>Rinse rice and cook in broth for extra flavor. Bring to a boil, cover, reduce to low, cook until fluffy. Rest covered 5 minutes.</li>
+          <li>Grill marinated chicken on each side until golden and cooked through. Brush extra marinade on as you grill. Let rest, then slice.</li>
+          <li>Whisk together all dressing ingredients in a small bowl or jar until well combined.</li>
+          <li>Assemble bowls: warm rice base, sliced chicken, cucumbers, avocado, cilantro, and pickled onions. Drizzle generously with honey-lime dressing ✨</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- TUESDAY -->
+    <div class="recipe-card" id="rec-tue">
+      <div class="recipe-header" onclick="toggleRecipe('rec-tue')">
+        <div class="recipe-title-wrap">
+          <span class="recipe-emoji">🧆</span>
+          <div>
+            <div class="recipe-day">Tuesday · April 7</div>
+            <div class="recipe-name">Greek Meatball Bowls</div>
+          </div>
+        </div>
+        <span class="recipe-arrow">▾</span>
+      </div>
+      <div class="recipe-body">
+        <div class="recipe-sub-title">Meatball Ingredients</div>
+        <ul class="ingredient-list">
+          <li>1 lb ground beef · 3 garlic cloves, finely minced · 2 medium onions, finely minced</li>
+          <li>2 tbsp breadcrumbs · 1 tsp baking soda · 1 tbsp olive oil</li>
+          <li>1 cup fresh herbs (parsley, mint, coriander), finely chopped</li>
+          <li>½ tsp salt · black pepper to taste</li>
+        </ul>
+        <ol class="instruction-list">
+          <li>Mix all meatball ingredients together in a large bowl. Cover and refrigerate 2 hours — the baking soda makes them extra tender.</li>
+          <li>Roll into small meatballs.</li>
+          <li>To bake: 425°F for 30–40 minutes until browned and cooked through. To pan-fry: cook in a skillet with olive oil 10–15 min, turning occasionally.</li>
+        </ol>
+        <hr class="recipe-divider" />
+        <div class="recipe-sub-title">Roasted Potatoes</div>
+        <ul class="ingredient-list">
+          <li>6 medium potatoes, cut into wedges · 2 tbsp olive oil</li>
+          <li>½ tsp each: salt, cumin, paprika, dried oregano · black pepper to taste</li>
+        </ul>
+        <ol class="instruction-list">
+          <li>Toss potato wedges with olive oil and all spices. Spread on a baking sheet.</li>
+          <li>Roast at 425°F for 40–60 minutes, flipping halfway, until crispy and golden.</li>
+        </ol>
+        <hr class="recipe-divider" />
+        <div class="recipe-sub-title">Tzatziki Sauce</div>
+        <ul class="ingredient-list">
+          <li>1 cup thick Greek yogurt · ½ cucumber, grated and squeezed dry</li>
+          <li>1 garlic clove, minced · 1 tbsp lemon juice · ⅓ cup fresh dill or mint, chopped</li>
+          <li>1 tbsp olive oil · salt to taste</li>
+        </ul>
+        <ol class="instruction-list">
+          <li>Combine all tzatziki ingredients, stir well, and chill until ready to serve.</li>
+        </ol>
+        <hr class="recipe-divider" />
+        <div class="recipe-sub-title">Build the Bowl</div>
+        <ul class="ingredient-list">
+          <li>2 cups crisp lettuce · 2 tomatoes, chopped · 2 cucumbers, chopped</li>
+          <li>½ red onion, chopped · ½ cup Kalamata olives</li>
+          <li>2 tbsp olive oil · 1 tbsp lemon juice · salt + pepper</li>
+        </ul>
+        <ol class="instruction-list">
+          <li>Start with a layer of crisp lettuce. Add Greek salad (tomatoes, cucumber, red onion, olives dressed with olive oil, lemon, salt + pepper).</li>
+          <li>Add a handful of roasted potato wedges and top with meatballs.</li>
+          <li>Finish with a big spoonful of tzatziki and extra fresh herbs ✨</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- WEDNESDAY -->
+    <div class="recipe-card" id="rec-wed">
+      <div class="recipe-header" onclick="toggleRecipe('rec-wed')">
+        <div class="recipe-title-wrap">
+          <span class="recipe-emoji">🍔</span>
+          <div>
+            <div class="recipe-day">Wednesday · April 8</div>
+            <div class="recipe-name">Turkey Burgers</div>
+          </div>
+        </div>
+        <span class="recipe-arrow">▾</span>
+      </div>
+      <div class="recipe-body">
+        <div class="recipe-sub-title">Ingredients</div>
+        <ul class="ingredient-list">
+          <li>1 lb 93% lean ground turkey</li>
+          <li>1 tbsp mayonnaise · 1 tbsp Dijon mustard · 1 tsp Worcestershire sauce</li>
+          <li>3 garlic cloves, minced · 1 tsp kosher salt · ½ tsp black pepper</li>
+          <li>2 tbsp extra virgin olive oil</li>
+        </ul>
+        <div class="recipe-sub-title">Optional Toppings</div>
+        <ul class="ingredient-list">
+          <li>Cheddar cheese · sliced tomato · sliced onion · caramelized onion</li>
+          <li>Pickles · lettuce · ketchup, mustard, and mayo</li>
+        </ul>
+        <div class="recipe-sub-title">Instructions</div>
+        <ol class="instruction-list">
+          <li>In a bowl, combine turkey, mayo, Dijon, Worcestershire, garlic, salt, and pepper. Mix with your hands until combined.</li>
+          <li>Divide evenly and form 4 large patties — don't overwork it.</li>
+          <li>Heat olive oil in a large skillet over medium heat. Cook patties ~5 min per side until golden brown and cooked through.</li>
+          <li>Add cheese at the end if using and let melt. Serve plain or load up with your favorite toppings ✨</li>
+        </ol>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <strong>Made with ❤️ by The Weekly Table</strong>
+  <p>Follow along on TikTok &amp; Instagram for daily cooking videos!</p>
+</footer>
+
+<script>
+  const TOTAL = 47;
+  const STORAGE_KEY = 'wtable-april6';
+
+  function getState() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
+  }
+  function saveState(state) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+  }
+  function getAllItems() {
+    return document.querySelectorAll('.grocery-item');
+  }
+  function updateProgress() {
+    const items = getAllItems();
+    const checked = [...items].filter(i => i.classList.contains('checked')).length;
+    document.getElementById('progressCount').textContent = `${checked} of ${TOTAL}`;
+    document.getElementById('progressBar').style.width = `${Math.round(checked / TOTAL * 100)}%`;
+    document.getElementById('doneBanner').classList.toggle('show', checked === TOTAL);
+    updateCategoryCounts();
+  }
+  function updateCategoryCounts() {
+    const cats = {
+      protein: [document.querySelector('#cat-protein .category-body'), 4],
+      produce: [document.querySelector('#cat-produce .category-body'), 17],
+      dairy:   [document.querySelector('#cat-dairy .category-body'), 2],
+      pantry:  [document.querySelector('#cat-pantry .category-body'), 24],
+    };
+    for (const [key, [body, total]] of Object.entries(cats)) {
+      if (!body) continue;
+      const checked = body.querySelectorAll('.grocery-item.checked').length;
+      document.getElementById(`cnt-${key}`).textContent = `${checked}/${total}`;
+    }
+  }
+  function toggleItem(el) {
+    const items = [...getAllItems()];
+    const index = items.indexOf(el);
+    el.classList.toggle('checked');
+    const cb = el.querySelector('.item-checkbox');
+    cb.textContent = el.classList.contains('checked') ? '✓' : '';
+    const state = getState();
+    state[index] = el.classList.contains('checked');
+    saveState(state);
+    updateProgress();
+  }
+  function resetAll() {
+    getAllItems().forEach(item => {
+      item.classList.remove('checked');
+      item.querySelector('.item-checkbox').textContent = '';
+    });
+    saveState({});
+    updateProgress();
+  }
+  function toggleCategory(id) {
+    document.getElementById(id).classList.toggle('open');
+  }
+  function toggleRecipe(id) {
+    document.getElementById(id).classList.toggle('open');
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const state = getState();
+    const items = [...getAllItems()];
+    items.forEach((item, i) => {
+      if (state[i]) {
+        item.classList.add('checked');
+        item.querySelector('.item-checkbox').textContent = '✓';
+      }
+    });
+    updateProgress();
+  });
+</script>
+</body>
+</html>
